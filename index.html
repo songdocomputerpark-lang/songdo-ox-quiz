@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>송도고 동아리 OX 퀴즈</title>
+<meta name="description" content="송도고 동아리가 준비한 OX 퀴즈 — 캐릭터를 골라 함께 참여하세요.">
+<meta property="og:title" content="송도고 동아리 OX 퀴즈">
+<meta property="og:description" content="캐릭터를 골라 입장하고, 15초 안에 O / X 구역으로 이동하세요!">
+<meta name="theme-color" content="#070B1A">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23070B1A'/%3E%3Ctext x='32' y='43' font-size='28' font-weight='900' text-anchor='middle' font-family='Arial'%3E%3Ctspan fill='%2386B8FF'%3EO%3C/tspan%3E%3Ctspan fill='%23FF93A7'%3EX%3C/tspan%3E%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg" aria-hidden="true"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i><div class="grid"></div></div>
+
+<div id="app" class="app" data-phase="lobby" data-role="player" data-answer="">
+
+  <header class="top">
+    <div class="brand"><span>송도고 동아리</span><b class="brand-ox"><i class="o">O</i><i class="x">X</i></b><span>퀴즈</span></div>
+    <ol class="steps" id="steps" aria-label="진행 상황"></ol>
+    <div class="top-right">
+      <span class="pill" id="netPill"><i class="dot"></i><span><b id="onlineCount">0</b>명 접속</span></span>
+      <button class="icon-btn" id="btnSound" type="button" aria-label="소리 켜기/끄기">🔊</button>
+      <button class="icon-btn h-only" id="btnFull" type="button" aria-label="전체 화면">⛶</button>
+    </div>
+  </header>
+
+  <main class="card" id="card">
+    <!-- 대기 화면 -->
+    <section class="view v-lobby">
+      <div class="lb-main">
+        <span class="eyebrow">SONGDO HIGH SCHOOL · CLUB QUIZ SHOW</span>
+        <h1 class="title"><small>송도고 동아리</small><i class="o">O</i><i class="x">X</i> 퀴즈</h1>
+        <p class="lead" id="lobbyLead">10개 동아리가 준비한 10문제 · 문제마다 이동 시간 15초</p>
+        <div class="clubs" id="clubs"></div>
+      </div>
+      <div class="lb-side h-only">
+        <div class="qr-card">
+          <img id="qrImg" alt="참여 QR 코드">
+          <b>온라인으로 함께 참여하기</b>
+          <span id="joinUrl"></span>
+          <em><i id="lobbyCount">0</i>명 입장</em>
+        </div>
+      </div>
+      <div class="lb-side p-only">
+        <ul class="howto">
+          <li><b>1</b>경기장을 터치(클릭)하면 캐릭터가 이동해요</li>
+          <li><b>2</b>15초 안에 <i class="o">O</i> 또는 <i class="x">X</i> 구역으로!</li>
+          <li><b>3</b>많이 맞힐수록 순위가 올라갑니다</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 문제 / 정답 화면 -->
+    <section class="view v-quiz">
+      <div class="q-body" id="qBody">
+        <div class="q-meta">
+          <span class="q-no">Q<b id="qNo">01</b></span>
+          <span class="q-club" id="qClub"></span>
+          <span class="q-state" id="qState"></span>
+        </div>
+        <p class="q-text" id="qText"></p>
+        <div class="exp"><span class="exp-tag">해설</span><p id="expText"></p></div>
+      </div>
+      <div class="q-side">
+        <div class="timer" id="timer">
+          <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="t-bg" cx="60" cy="60" r="52"/><circle class="t-fg" id="tRing" cx="60" cy="60" r="52"/></svg>
+          <span class="t-num" id="tNum">15</span>
+          <span class="t-label" id="tLabel">READY</span>
+        </div>
+        <div class="answer">
+          <span class="a-tag">정답</span>
+          <b class="a-mark" id="aMark">?</b>
+          <span class="a-say" id="aSay"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 최종 결과 -->
+    <section class="view v-final">
+      <div class="lb-main">
+        <span class="eyebrow">QUIZ COMPLETE</span>
+        <h1 class="title sm">수고하셨습니다!</h1>
+        <p class="lead" id="finalMsg"></p>
+      </div>
+      <div class="fin-side">
+        <div class="rank-title">🏆 온라인 참가자 순위</div>
+        <ol class="rank" id="rank"></ol>
+        <p class="rank-empty" id="rankEmpty">온라인 참가자 기록이 없습니다</p>
+      </div>
+    </section>
+  </main>
+
+  <section class="arena" id="arena">
+    <div class="zone zo"><b>O</b><div class="z-head"><span>O 구역</span><em><i id="cntO">0</i>명</em></div><div class="z-win">정답!</div></div>
+    <div class="zone zx"><b>X</b><div class="z-head"><span>X 구역</span><em><i id="cntX">0</i>명</em></div><div class="z-win">정답!</div></div>
+    <div class="chars" id="chars"><i class="target" id="target"></i></div>
+    <div class="banner" id="banner"></div>
+  </section>
+
+  <footer class="dock">
+    <!-- 진행자 조작부 -->
+    <div class="dock-side h-only"><button class="btn" id="btnQR" type="button">▦ 참여 QR</button><span class="hint">Space · → 다음 단계</span></div>
+    <div class="dock-mid h-only">
+      <button class="btn" id="btnPrev" type="button">◀ 이전</button>
+      <button class="btn primary" id="btnMain" type="button">퀴즈 시작</button>
+      <button class="btn" id="btnNext" type="button">바로 종료 ▶</button>
+    </div>
+    <div class="dock-side right h-only"><button class="btn" id="btnReset" type="button">↺ 처음으로</button></div>
+    <!-- 참가자 상태 -->
+    <div class="me p-only"><span class="me-emo" id="meEmo">🐶</span><div><b id="meName"></b><small id="meState"></small></div></div>
+    <div class="emotes p-only" id="emotes"></div>
+    <div class="score p-only"><small>정답</small><b id="meScore">0</b></div>
+  </footer>
+</div>
+
+<!-- 참가자 입장 -->
+<div class="overlay" id="join">
+  <form class="modal" id="joinForm" autocomplete="off">
+    <div class="m-brand">송도고 동아리 <i class="o">O</i><i class="x">X</i> 퀴즈</div>
+    <h2>캐릭터를 골라 입장하세요</h2>
+    <div class="pv"><span id="pvEmo">🐶</span></div>
+    <input id="inName" type="text" maxlength="8" placeholder="닉네임 (최대 8자)" enterkeyhint="done" required>
+    <div class="char-grid" id="charGrid"></div>
+    <button class="btn primary big" type="submit">입장하기</button>
+    <p class="m-hint">입장하면 배경 음악이 재생됩니다 · 오른쪽 위 🔊 로 끌 수 있어요</p>
+  </form>
+</div>
+
+<!-- 진행자 시작 -->
+<div class="overlay" id="hostSplash">
+  <div class="modal">
+    <div class="m-brand">HOST · 진행자 화면</div>
+    <h2>송도고 동아리 <i class="o">O</i><i class="x">X</i> 퀴즈</h2>
+    <p class="m-text">버튼을 누르면 배경 음악과 함께 대기 화면이 열립니다.</p>
+    <button class="btn primary big" id="btnHostEnter" type="button">진행 시작</button>
+    <p class="m-hint">Space / → 다음 단계 &nbsp;·&nbsp; ← 이전 &nbsp;·&nbsp; M 음소거 &nbsp;·&nbsp; F 전체 화면</p>
+  </div>
+</div>
+
+<!-- 참여 QR 크게 보기 -->
+<div class="overlay" id="qrModal">
+  <div class="modal qr-modal">
+    <div class="m-brand">온라인으로 함께 참여하기</div>
+    <img id="qrBig" alt="참여 QR 코드">
+    <b id="qrUrl"></b>
+    <button class="btn" id="btnQRClose" type="button">닫기</button>
+  </div>
+</div>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<script src="mqtt-lite.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
